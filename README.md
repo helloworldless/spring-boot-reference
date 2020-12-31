@@ -1,5 +1,8 @@
 # Spring Boot Reference
 
+Spring Boot reference app showing many common use cases and patterns
+
+
 ```bash
 $ curl -s http://localhost:8080/api/headers | jq
 {
