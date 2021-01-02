@@ -4,3 +4,9 @@ spring:
   jackson:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
+
+app:
+  user: test-user
+  threads: 4
+  user-api:
+    url: http://fake-url

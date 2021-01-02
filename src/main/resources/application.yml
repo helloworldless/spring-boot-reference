@@ -2,3 +2,9 @@ spring:
   jackson:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
+
+app:
+  user: dev-user
+  threads: 2
+  user-api:
+    url: http://example.com
