@@ -1,5 +1,7 @@
 # Spring Boot Reference
 
+_Spring Boot reference app showing many common use cases and patterns_
+
 ## Running Locally
 
 1. Run `SpringBootApp`
