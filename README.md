@@ -65,6 +65,39 @@ Caused by: java.lang.NullPointerException: null
 	... 5 common frames omitted
 ```
 
+## Transparently Make OAuth 2 Client Credentials Authorization Request using WebClient
+
+Related blog posts:
+- [How to Automatically Refresh OAuth2 Client Credentials in Spring](https://davidagood.com/oauth-client-credentials-auto-refresh-spring/)
+- [How To Completely Disable HTTP Security in Spring Security](https://davidagood.com/spring-security-disable-http-security/)
+
+This is demonstrated through an integration test, `AuthorizedWebClientIT.java` rather than
+live calls to authorization and resource servers.
+
+Almost all the classes mentioned below are in the package `org.springframework.security.oauth2.client`
+or `org.springframework.security.oauth2.client.web`
+from `org.springframework.security:spring-security-oauth2-client`...
+
+1. `ServletOAuth2AuthorizedClientExchangeFilterFunction.filter`
+   1. Takes the resource server request
+   1. Uses existing authorization or, if necessary, handles making a new authorization request
+   1. Adds bearer token to resource server request
+1. `ServletOAuth2AuthorizedClientExchangeFilterFunction.authorizeClient`
+1. `DefaultOAuth2AuthorizedClientManager.authorize`
+   1. `authorizedClient = this.authorizedClientRepository.loadAuthorizedClient(clientRegistrationId, principal,
+      servletRequest);`
+   1. If nested calls return an `AuthorizedClient`, this calls its member,
+      `OAuth2AuthorizationSuccessHandler` which saves the `AuthorizedClient` to the
+      `AuthenticatedPrincipalOAuth2AuthorizedClientRepository` which delegates to
+      the `HttpSessionOAuth2AuthorizedClientRepository` which gets the `HttpSession`
+      out of the `HttpServletRequest`, and then looks for the property `AUTHORIZED_CLIENTS`
+      in the session attributes.
+1. `DelegatingOAuth2AuthorizedClientProvider.authorize`
+1. `ClientCredentialsOAuth2AuthorizedClientProvider.authorize`
+   1. This is where it checks if the token has expired
+   1. Returns null if a new authorization request does not need to be made
+      which then the AuthorizedClientManager will just use the existing auth
+
 ## MapStruct Lombok Issues
 Lombok 1.18.16 was a breaking change for MapStruct. 
 The [release notes](https://github.com/rzwitserloot/lombok/releases/tag/v1.18.16) say 
