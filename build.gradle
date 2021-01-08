@@ -32,6 +32,7 @@ repositories {
 ext {
 	lombokVersion = '1.18.14' // See README: MapStruct Lombok Issues
 	mapstructVersion = '1.4.1.Final'
+	okHttpVersion = '4.9.0'
 }
 
 dependencies {
@@ -53,6 +54,9 @@ dependencies {
 
 	testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
 	testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+	implementation "com.squareup.okhttp3:okhttp:${okHttpVersion}"
+	testImplementation "com.squareup.okhttp3:mockwebserver:${okHttpVersion}"
 }
 
 test {

@@ -10,7 +10,7 @@ import java.time.Instant;
 import java.util.function.Supplier;
 
 @SpringBootApplication
-@EnableConfigurationProperties({ AppConfig.class })
+@EnableConfigurationProperties({ AppConfig.class, SecretWordsClientConfig.class })
 public class SpringBootApp {
 
 	public static void main(String[] args) {

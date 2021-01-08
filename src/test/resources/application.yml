@@ -10,3 +10,6 @@ app:
   threads: 4
   user-api:
     url: http://fake-url
+
+secret-words-client:
+  url: https://dummy-secret-words-resource-server/api/words

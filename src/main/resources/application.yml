@@ -8,3 +8,6 @@ app:
   threads: 2
   user-api:
     url: http://example.com
+
+secret-words-client:
+  url: https://dummy-secret-words-resource-server/api/words

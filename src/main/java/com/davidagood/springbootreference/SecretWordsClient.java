@@ -18,9 +18,11 @@ public class SecretWordsClient {
 
 	private final WebClient webClient;
 
+	private final SecretWordsClientConfig config;
+
 	public List<String> getSecretWords() {
 		var get = HttpMethod.GET;
-		var url = "https://dummy-secret-words-resource-server/api/words";
+		var url = config.getUrl();
 		log.info("Making HTTP request method={}, url={}", get, url);
 		// @formatter:off
 		return webClient.method(get)

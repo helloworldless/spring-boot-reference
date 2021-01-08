@@ -67,7 +67,7 @@ class IntegrationTest {
 		HeadersDto expected = HeadersDto.builder().headers(headers.getHeaders()).createdAt(TIMESTAMP).build();
 
 		mockMvc.perform(get("/api/headers")).andDo(print()).andExpect(status().isOk())
-				.andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(expected)));
+				.andExpect(MockMvcResultMatchers.content().json(objectMapper.writeValueAsString(expected), true));
 	}
 
 }

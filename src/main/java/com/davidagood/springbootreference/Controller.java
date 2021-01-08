@@ -11,7 +11,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.List;
 import java.util.function.Supplier;
 
 @RestController
@@ -39,9 +38,9 @@ public class Controller {
 	}
 
 	@GetMapping("/words")
-	public List<String> getSecretWords() {
+	public SecretWordsDto getSecretWords() {
 		log.info("Getting secret words");
-		return secretWordsClient.getSecretWords();
+		return new SecretWordsDto(secretWordsClient.getSecretWords(), timestampSupplier.get());
 	}
 
 }
