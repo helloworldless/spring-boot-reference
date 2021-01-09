@@ -5,15 +5,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.endpoint.DefaultClientCredentialsTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentialsGrantRequest;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -45,19 +45,25 @@ public class AuthorizedWebClientConfig {
 		}).build();
 	}
 
+	/**
+	 * Since we do not want the client credentials grant request to be tied to specific
+	 * HTTP session via the context of a servlet request, we do not use the
+	 * DefaultOAuth2AuthorizedClientManager here. Instead we use the
+	 * AuthorizedClientServiceOAuth2AuthorizedClientManager which is designed for use
+	 * outside of a servlet context and behaves like we would expect for
+	 * service-to-service authorization. See more in here:
+	 * https://davidagood.com/oauth-client-credentials-auto-refresh-spring/
+	 */
 	@Bean
 	OAuth2AuthorizedClientManager authorizedClientManager(ClientRegistrationRepository clientRegistrationRepository,
-			OAuth2AuthorizedClientRepository authorizedClientRepository,
+			OAuth2AuthorizedClientService oAuth2AuthorizedClientService,
 			OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> tokenResponseClient) {
-
 		OAuth2AuthorizedClientProvider authorizedClientProvider = OAuth2AuthorizedClientProviderBuilder.builder()
 				.clientCredentials(r -> r.accessTokenResponseClient(tokenResponseClient)).clientCredentials().build();
-
-		DefaultOAuth2AuthorizedClientManager authorizedClientManager = new DefaultOAuth2AuthorizedClientManager(
-				clientRegistrationRepository, authorizedClientRepository);
-		authorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
-
-		return authorizedClientManager;
+		var authorizedClientServiceOAuth2AuthorizedClientManager = new AuthorizedClientServiceOAuth2AuthorizedClientManager(
+				clientRegistrationRepository, oAuth2AuthorizedClientService);
+		authorizedClientServiceOAuth2AuthorizedClientManager.setAuthorizedClientProvider(authorizedClientProvider);
+		return authorizedClientServiceOAuth2AuthorizedClientManager;
 	}
 
 	@Bean
