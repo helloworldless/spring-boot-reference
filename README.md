@@ -98,6 +98,15 @@ from `org.springframework.security:spring-security-oauth2-client`...
    1. Returns null if a new authorization request does not need to be made
       which then the AuthorizedClientManager will just use the existing auth
 
+### Other Info
+
+What autowires a `ClientRegistrationRepository` (concrete class: `InMemoryClientRegistrationRepository`) if 
+one is not already registered?
+
+This: `org.springframework.boot.autoconfigure.security.oauth2.client.servletOAuth2ClientRegistrationRepositoryConfiguration`
+
+It looks up registrations from application properties: `spring.security.oauth2.client.registration`
+
 ## MapStruct Lombok Issues
 Lombok 1.18.16 was a breaking change for MapStruct. 
 The [release notes](https://github.com/rzwitserloot/lombok/releases/tag/v1.18.16) say 

@@ -9,7 +9,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 
-import static org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
+import static com.davidagood.springbootreference.AuthorizedWebClientConfig.REGISTRATION_ID;
+import static org.springframework.security.oauth2.client.web.reactive.function.client.ServerOAuth2AuthorizedClientExchangeFilterFunction.clientRegistrationId;
 
 @Component
 @RequiredArgsConstructor
@@ -27,7 +28,7 @@ public class SecretWordsClient {
 		// @formatter:off
 		return webClient.method(get)
 				.uri(url)
-                .attributes(clientRegistrationId("my-client"))
+                .attributes(clientRegistrationId(REGISTRATION_ID))
                 .retrieve()
 				.bodyToMono(new ParameterizedTypeReference<List<String>>() {})
                 .block();

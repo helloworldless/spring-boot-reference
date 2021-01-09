@@ -4,6 +4,21 @@ spring:
   jackson:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
+  security:
+    oauth2:
+      client:
+        registration:
+          my-client:
+            provider: my-client-provider
+            client-id: dummy-client-id
+            client-secret: dummy-client-secret
+            client-authentication-method: post
+            authorization-grant-type: client_credentials
+            scope: "*"
+            client-name: My Client
+        provider:
+          my-client-provider:
+            token-uri: https://dummy-token-uri/oauth/token
 
 app:
   user: test-user

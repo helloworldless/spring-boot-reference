@@ -25,6 +25,7 @@ import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentia
 import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentialsGrantRequestEntityConverter;
 import org.springframework.security.oauth2.client.http.OAuth2ErrorResponseErrorHandler;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
 import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -45,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static com.davidagood.springbootreference.AuthorizedWebClientConfig.REGISTRATION_ID;
 import static com.davidagood.springbootreference.TestUtil.getFreePort;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
@@ -82,7 +84,7 @@ class AuthorizedWebClientIT {
 	ObjectMapper objectMapper;
 
 	@Autowired
-	ClientRegistration clientRegistration;
+	ClientRegistrationRepository clientRegistrationRepository;
 
 	private MockRestServiceServer mockServer;
 
@@ -110,7 +112,9 @@ class AuthorizedWebClientIT {
 		 * See this blog post which explains why we expect this to happen twice:
 		 * https://davidagood.com/oauth-client-credentials-auto-refresh-spring/
 		 */
-		mockServer.expect(twice(), requestTo("https://dummy-token-uri/token"))
+		var tokenUri = clientRegistrationRepository.findByRegistrationId(REGISTRATION_ID).getProviderDetails()
+				.getTokenUri();
+		mockServer.expect(twice(), requestTo(tokenUri))
 				.andExpect(content()
 						.contentType(new MediaType(MediaType.APPLICATION_FORM_URLENCODED, StandardCharsets.UTF_8)))
 				.andExpect(content().formData(createGrantRequestFormData()))
@@ -142,8 +146,9 @@ class AuthorizedWebClientIT {
 	@Test
 	void sharedSession() throws Exception {
 		var secretWords = List.of("speakers", "keyboard");
-
-		mockServer.expect(once(), requestTo("https://dummy-token-uri/token"))
+		var tokenUri = clientRegistrationRepository.findByRegistrationId(REGISTRATION_ID).getProviderDetails()
+				.getTokenUri();
+		mockServer.expect(once(), requestTo(tokenUri))
 				.andExpect(content()
 						.contentType(new MediaType(MediaType.APPLICATION_FORM_URLENCODED, StandardCharsets.UTF_8)))
 				.andExpect(content().formData(createGrantRequestFormData()))
@@ -200,7 +205,8 @@ class AuthorizedWebClientIT {
 	 */
 	@SuppressWarnings("unchecked")
 	private MultiValueMap<String, String> createGrantRequestFormData() {
-		var grantRequest = new OAuth2ClientCredentialsGrantRequest(clientRegistration);
+		ClientRegistration myClientRegistration = clientRegistrationRepository.findByRegistrationId(REGISTRATION_ID);
+		var grantRequest = new OAuth2ClientCredentialsGrantRequest(myClientRegistration);
 		RequestEntity<?> requestEntity = new OAuth2ClientCredentialsGrantRequestEntityConverter().convert(grantRequest);
 		return (MultiValueMap<String, String>) requestEntity.getBody();
 	}

@@ -11,21 +11,19 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider
 import org.springframework.security.oauth2.client.endpoint.DefaultClientCredentialsTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentialsGrantRequest;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class AuthorizedWebClientConfig {
 
-	@Bean
+	public static final String REGISTRATION_ID = "my-client";
+
+	@Bean("authenticatedWebClient")
 	WebClient webClient(OAuth2AuthorizedClientManager authorizedClientManager, ExchangeStrategies exchangeStrategies) {
 		ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2Client = new ServletOAuth2AuthorizedClientExchangeFilterFunction(
 				authorizedClientManager);
@@ -65,26 +63,6 @@ public class AuthorizedWebClientConfig {
 	@Bean
 	OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> tokenResponseClient() {
 		return new DefaultClientCredentialsTokenResponseClient();
-	}
-
-	@Bean
-	InMemoryClientRegistrationRepository clientRegistrationRepository() {
-		return new InMemoryClientRegistrationRepository(myClientRegistration());
-	}
-
-	@Bean
-	ClientRegistration myClientRegistration() {
-		// @formatter:off
-		return ClientRegistration
-				.withRegistrationId("my-client")
-				.clientId("dummy-client-id")
-				.clientSecret("dummy-client-secret")
-				.clientAuthenticationMethod(ClientAuthenticationMethod.POST)
-				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-				.scope("*")
-				.tokenUri("https://dummy-token-uri/token")
-				.build();
-		// @formatter:on
 	}
 
 }
