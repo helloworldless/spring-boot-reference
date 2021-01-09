@@ -21,8 +21,6 @@ public class Controller {
 
 	private final RestTemplate restTemplate;
 
-	private final SecretWordsClient secretWordsClient;
-
 	private final HeadersMapper headersMapper;
 
 	private final Supplier<Instant> timestampSupplier;
@@ -35,12 +33,6 @@ public class Controller {
 		ResponseEntity<Headers> responseEntity = restTemplate.exchange(requestEntity, Headers.class);
 		Headers headers = responseEntity.getBody();
 		return headersMapper.map(headers, timestampSupplier.get());
-	}
-
-	@GetMapping("/words")
-	public SecretWordsDto getSecretWords() {
-		log.info("Getting secret words");
-		return new SecretWordsDto(secretWordsClient.getSecretWords(), timestampSupplier.get());
 	}
 
 }

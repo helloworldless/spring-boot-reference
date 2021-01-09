@@ -65,69 +65,6 @@ Caused by: java.lang.NullPointerException: null
 	... 5 common frames omitted
 ```
 
-## Transparently Make OAuth 2 Client Credentials Authorization Request using WebClient
-
-Related blog posts:
-- [How to Automatically Refresh OAuth2 Client Credentials in Spring](https://davidagood.com/oauth-client-credentials-auto-refresh-spring/)
-- [How To Completely Disable HTTP Security in Spring Security](https://davidagood.com/spring-security-disable-http-security/)
-
-This is demonstrated through an integration test, `AuthorizedWebClientIT` rather than
-live calls to authorization and resource servers. 
-
-The Spring configuration which enables all of this is 
-in `AuthorizedWebClientConfig` with overrides for integration testing 
-in `AuthorizedWebClientIT.TestConfig`.
-
-### How This Is All Works Under The Hood
-
-Almost all the classes mentioned below are in the package `org.springframework.security.oauth2.client`
-or `org.springframework.security.oauth2.client.web`
-from `org.springframework.security:spring-security-oauth2-client`...
-
-1. `ServletOAuth2AuthorizedClientExchangeFilterFunction.filter`
-   1. Takes the resource server request
-   1. Uses existing authorization or, if necessary, handles making a new authorization request (see next step)
-   1. Adds bearer token to resource server request
-1. `ServletOAuth2AuthorizedClientExchangeFilterFunction.authorizeClient`
-1. Calls `OAuth2AuthorizedClientManager.authorize`
-
-Using the `AuthorizedClientServiceOAuth2AuthorizedClientManager` as the concrete `OAuth2AuthorizedClientManager`:
-
-1. `AuthorizedClientServiceOAuth2AuthorizedClientManager.authorize`
-   1. Calls its member `OAuth2AuthorizedClientService.loadAuthorizedClient`
-1. `InMemoryOAuth2AuthorizedClientService.loadAuthorizedClient`
-   1. Stores authorized clients in a `ConcurrentHashMap`
-   1. The only parameters you need to retrieve an authorized client are:
-      1. clientRegistrationId - whatever arbitrary registration id you've given, 
-         e.g. in `spring.security.oauth2.client.registration.<client-registration-id-here>`
-      1. principalName - "anonymousUser" in this case, 
-         see `ServletOAuth2AuthorizedClientExchangeFilterFunction.ANONYMOUS_AUTHENTICATION`
-
-Using the `DefaultOAuth2AuthorizedClientManager` as the concrete `OAuth2AuthorizedClientManager`:
-
-1. `DefaultOAuth2AuthorizedClientManager.authorize`
-   1. Call its member `OAuth2AuthorizedClientRepository.loadAuthorizedClient` 
-1. `AuthenticatedPrincipalOAuth2AuthorizedClientRepository.loadAuthorizedClient`
-   1. If the authenticated user is anonymous, defers to:
-1. `HttpSessionOAuth2AuthorizedClientRepository.loadAuthorizedClient`
-   1. This looks for the authorized client in the `HttpServletRequest`'s `HttpSession`
-1. `DelegatingOAuth2AuthorizedClientProvider.authorize`
-1. `ClientCredentialsOAuth2AuthorizedClientProvider.authorize`
-   1. This is where it checks if an authorization request needs to be made 
-      (if the authorized client is `null` or the token has expired)
-   1. Returns `null` to signal that a new authorization request did not need to be made
-      because an unexpired authorized client already existed in which case 
-      the AuthorizedClientManager will just use the existing auth
-
-### Other Info
-
-What autowires a `ClientRegistrationRepository` (concrete class: `InMemoryClientRegistrationRepository`) if 
-one is not already registered?
-
-This: `org.springframework.boot.autoconfigure.security.oauth2.client.servletOAuth2ClientRegistrationRepositoryConfiguration`
-
-It looks up registrations from application properties: `spring.security.oauth2.client.registration`
-
 ## MapStruct Lombok Issues
 Lombok 1.18.16 was a breaking change for MapStruct. 
 The [release notes](https://github.com/rzwitserloot/lombok/releases/tag/v1.18.16) say 
