@@ -30,7 +30,7 @@ repositories {
 }
 
 ext {
-	lombokVersion = '1.18.14' // See README: MapStruct Lombok Issues
+	lombokVersion = '1.18.16'
 	mapstructVersion = '1.4.1.Final'
 	okHttpVersion = '4.9.0'
 }
@@ -46,6 +46,8 @@ dependencies {
 
 	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+
+	implementation 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
